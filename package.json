@@ -1,0 +1,34 @@
+{
+  "name": "tape-comment-formatter",
+  "version": "1.0.0",
+  "description": "Format tape test comments",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "babel src --out-dir build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "CLI",
+    "Tape"
+  ],
+  "author": "EarthyOrange",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EarthyOrange/tape_comment_formatter.git"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@babel/runtime-corejs3": "^7.17.2",
+    "@glowlamp/colors": "0.0.0",
+    "@glowlamp/control-sequences": "0.0.0",
+    "core-js": "^3.21.1",
+    "dedent-js": "^1.0.1"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.17.6",
+    "@babel/core": "^7.17.5",
+    "@babel/plugin-proposal-export-default-from": "^7.16.7",
+    "@babel/plugin-transform-runtime": "^7.17.0",
+    "@babel/preset-env": "^7.16.11"
+  }
+}
