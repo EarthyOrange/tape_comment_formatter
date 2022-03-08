@@ -37,3 +37,5 @@ test('Test #1', (t) => {
 </pre>
 
 ![Looks like](./output.png)
+
+Formatting the remainder of TAP-13 output is being done by tap-diff here. 
