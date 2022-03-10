@@ -1,6 +1,9 @@
 import dedent from 'dedent-js';
 import { foreGroundColor, moveCursorUp, moveCursorForward } from '@glowlamp/control-sequences';
 import { ubuntu } from '@glowlamp/colors';
+import List from './List';
+import { DashUnorderedStrategy } from "./OrderStrategy";
+import ListItem, { BlankListItem } from "./ListItem";
 
 export function repeat(n, f) {
   return Array.from({ length: n }, (_, i) => f ?? i);
@@ -60,59 +63,33 @@ export const rules = {
  * @returns {descriptionObject}
  */
 export function description(formatter = rules) {
-  let whenLines = '';
-  let thenLines = '';
-  /**
-   *
-   * @type {descriptionObject}
-   * @private
-   */
-  const _description = {
-    /**
-     * @name when
-     * @method
-     * @param {string} multiLineString
-     * @param {rules=} whenFormatter
-     * @returns {descriptionObject}
-     */
-    when(multiLineString = '', whenFormatter = formatter) {
-      const lines = getLines(multiLineString);
-      const { moveUp, moveForward: mf, whenColor: wc } = whenFormatter;
-      const mf2 = repeat(2, mf).join('');
-      whenLines = [
-        [`${mf2}- When:`],
-        lines.map((line) => `${moveUp}${mf2}${mf}${wc}${line}`),
-      ]
-        .flat()
-        .join('\n');
-      return _description;
+  const listFactory = {
+    list: (orderStrategy = new DashUnorderedStrategy()) => new List(orderStrategy),
+    listItem: (string) => new ListItem(string),
+  };
+  const descriptionContainer = new List(new DashUnorderedStrategy());
+  const thenDescription = {
+    then(cb) {
+      descriptionContainer
+        .li(new ListItem('Then:'))
+        .li(cb(listFactory));
+      return thenDescription;
     },
-    /**
-     * @name then
-     * @method
-     * @param {string} multiLineString
-     * @param {rules=} thenFormatter
-     * @returns {descriptionObject}
-     */
-    then(multiLineString = '', thenFormatter = formatter) {
-      const lines = getLines(multiLineString);
-      const { moveUp, moveForward: mf, thenColor: tc } = thenFormatter;
-      const mf2 = repeat(2, mf).join('');
-      thenLines = [
-        [`${mf2}- Then:`],
-        lines.map((line) => `${moveUp}${mf2}${mf}${tc}${line}`),
-      ]
-        .flat()
-        .join('\n');
-      return _description;
+    formattedWith() {
+
     },
-    /**
-     * The description
-     * @property {string} script
-     */
     get script() {
-      return `${whenLines}\n${thenLines}`;
+      return thenDescription.formattedWith();
     },
   };
-  return _description;
+  const whenDescription = {
+    when(cb) {
+      descriptionContainer
+        .li(new ListItem('When:'))
+        .li(cb(listFactory))
+        .li(new BlankListItem());
+      return thenDescription;
+    },
+  };
+  return whenDescription;
 }
