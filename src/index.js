@@ -1,95 +1,91 @@
-import dedent from 'dedent-js';
-import { foreGroundColor, moveCursorUp, moveCursorForward } from '@glowlamp/control-sequences';
-import { ubuntu } from '@glowlamp/colors';
-import List from './List';
-import { DashUnorderedStrategy } from "./OrderStrategy";
-import ListItem, { BlankListItem } from "./ListItem";
-
-export function repeat(n, f) {
-  return Array.from({ length: n }, (_, i) => f ?? i);
-}
-
-function getLines(multiLineString = '') {
-  return dedent(multiLineString).split('\n');
-}
-
-const moveCursorUpBy = Symbol('moveCursorUpBy');
-const moveCursorForwardBy = Symbol('moveCursorForwardBy');
-const whenColor = Symbol('whenColor');
-const thenColor = Symbol('thenColor');
-
-/**
- * @type rules
- */
-export const rules = {
-  /* ------------------------------ */
-  [moveCursorUpBy]: moveCursorUp(1),
-  set moveUp(n) {
-    rules[moveCursorUpBy] = moveCursorUp(n);
-  },
-  get moveUp() {
-    return rules[moveCursorUpBy];
-  },
-  /* ------------------------------ */
-  [moveCursorForwardBy]: moveCursorForward(2),
-  set moveForward(n) {
-    rules[moveCursorForwardBy] = moveCursorForward(n);
-  },
-  get moveForward() {
-    return rules[moveCursorForwardBy];
-  },
-  /* ------------------------------ */
-  [whenColor]: foreGroundColor(ubuntu.yellow),
-  set whenColor(_color) {
-    rules[whenColor] = foreGroundColor(_color);
-  },
-  get whenColor() {
-    return rules[whenColor];
-  },
-  /* ------------------------------ */
-  [thenColor]: foreGroundColor(ubuntu.green),
-  set thenColor(_color) {
-    rules[thenColor] = foreGroundColor(_color);
-  },
-  get thenColor() {
-    return rules[thenColor];
-  },
-  /* ------------------------------ */
-};
+import {foregroundColor, MoveCursorHorizontally} from '@glowlamp/control-sequences';
+import {ubuntu} from '@glowlamp/colors';
+import {BlankListItem, Column, ListItem, OrderStrategy, ViewRules} from '@glowlamp/glow';
 
 /**
  * Function to format the multiline strings, to be used for t.comment function parameter.
- * @param {rules=} formatter
- * @returns {descriptionObject}
+ * @function
+ * @returns {When}
  */
-export function description(formatter = rules) {
-  const listFactory = {
-    list: (orderStrategy = new DashUnorderedStrategy()) => new List(orderStrategy),
+export default function description() {
+  const { DashUnorderedStrategy } = OrderStrategy;
+  const whenRules = new ViewRules()
+    .setIndentation(new MoveCursorHorizontally(2))
+    .setForegroundColor(foregroundColor(ubuntu.yellow));
+  const thenRules = new ViewRules()
+    .setIndentation(new MoveCursorHorizontally(2))
+    .setForegroundColor(foregroundColor(ubuntu.green));
+
+  /**
+   * @function
+   * @returns {ListBuilder}
+   */
+  const listFactory = (rules) => ({
+    list: (orderStrategy = new DashUnorderedStrategy()) => Column(orderStrategy).setViewRules(rules),
     listItem: (string) => new ListItem(string),
+    rules,
+  });
+
+  const whenListFactory = listFactory(whenRules);
+  const thenListFactory = listFactory(thenRules);
+  const descriptionContainer = Column(new DashUnorderedStrategy())
+    .setViewRules(
+      new ViewRules().setIndentation(new MoveCursorHorizontally(4)),
+    );
+
+  /**
+   * @typedef ScriptContainer
+   * @type {object}
+   */
+  const scriptContainer = {
+    /**
+     * @readonly
+     * @returns {string}
+     */
+    get script() {
+      return descriptionContainer.getViewable();
+    },
   };
-  const descriptionContainer = new List(new DashUnorderedStrategy());
+
+  /**
+   * @typedef Then
+   * @type {object}
+   */
   const thenDescription = {
+    /**
+     * @function
+     * @param cb
+     * @returns {ScriptContainer}
+     */
     then(cb) {
       descriptionContainer
-        .li(new ListItem('Then:'))
-        .li(cb(listFactory));
-      return thenDescription;
-    },
-    formattedWith() {
-
-    },
-    get script() {
-      return thenDescription.formattedWith();
+        .li(
+          new ListItem('Then:')
+            .setViewRules(
+              new ViewRules().setForegroundColor(foregroundColor(ubuntu.green)),
+            ),
+        )
+        .li(cb(thenListFactory));
+      return scriptContainer;
     },
   };
-  const whenDescription = {
+  return {
+    /**
+     * @function
+     * @param cb
+     * @returns {Then}
+     */
     when(cb) {
       descriptionContainer
-        .li(new ListItem('When:'))
-        .li(cb(listFactory))
+        .li(
+          new ListItem('When:')
+            .setViewRules(
+              new ViewRules().setForegroundColor(foregroundColor(ubuntu.yellow)),
+            ),
+        )
+        .li(cb(whenListFactory))
         .li(new BlankListItem());
       return thenDescription;
     },
   };
-  return whenDescription;
 }

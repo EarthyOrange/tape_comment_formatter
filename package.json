@@ -1,10 +1,11 @@
 {
   "name": "tape-comment-formatter",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "Format tape test comments",
   "main": "build/index.js",
   "scripts": {
     "build": "babel src --out-dir build",
+    "lint": "eslint --config node_modules/@glowlamp/lint/.eslintrc src --fix",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -21,7 +22,8 @@
   "dependencies": {
     "@babel/runtime-corejs3": "^7.17.2",
     "@glowlamp/colors": "0.0.0",
-    "@glowlamp/control-sequences": "0.0.0",
+    "@glowlamp/control-sequences": "0.3.0",
+    "@glowlamp/glow": "0.0.0",
     "core-js": "^3.21.1",
     "dedent-js": "^1.0.1"
   },
@@ -30,6 +32,8 @@
     "@babel/core": "^7.17.5",
     "@babel/plugin-proposal-export-default-from": "^7.16.7",
     "@babel/plugin-transform-runtime": "^7.17.0",
-    "@babel/preset-env": "^7.16.11"
+    "@babel/preset-env": "^7.16.11",
+    "@glowlamp/lint": "1.0.0",
+    "eslint": "^8.11.0"
   }
 }
