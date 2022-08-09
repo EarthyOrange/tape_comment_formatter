@@ -12,20 +12,18 @@ To format the comment block in the _tape_ test harness' unit test
 **Usage:**
 <pre>
 import test from 'tape';
-import { description } from 'tape-comment-formatter';
+import description from 'tape-comment-formatter';
 
 test('Test #1', (t) => {
     const { script } = description()
         .when(
-            `
-                - Alice has an orange
-                - Bob has a juicer
-            `,
+            ({ list }) => list()
+                .li('Alice has an orange')
+                .li(Bob has a juicer'),
         )
         .then(
-            `
-                - Orange juice can be squeezed
-            `,
+            ({ list }) => list()
+                .li('Orange juice can be squeezed'),
         );
     t.comment(script);
 
